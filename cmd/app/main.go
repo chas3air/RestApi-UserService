@@ -1,7 +1,7 @@
 package main
 
 import (
-	"userservice/internal/storage/sqlite.go"
+	"userservice/internal/storage/sqlite"
 	"userservice/pkg/config"
 	"userservice/pkg/logger"
 )
