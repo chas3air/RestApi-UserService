@@ -35,6 +35,9 @@ func (s *HTTPApplication) Start() error {
 	users_handler := users_handler.New(s.log, s.userService)
 
 	r := mux.NewRouter()
+	r.HandleFunc("/health-check", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 	r.HandleFunc("/users", users_handler.Get).Methods(http.MethodGet)
 	r.HandleFunc("/users/{id}", users_handler.GetById).Methods(http.MethodGet)
 	r.HandleFunc("/users", users_handler.Insert).Methods(http.MethodPost)

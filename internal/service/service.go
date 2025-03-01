@@ -7,5 +7,5 @@ type IUserService interface {
 	GetById(int) (models.User, error)
 	Insert(models.User) error
 	Update(int, models.User) error
-	Delte(int) error
+	Delete(int) error
 }

@@ -15,11 +15,9 @@ func main() {
 
 	logger := logger.SetupLogger(config.Env)
 
-	_ = logger
-
 	storage := sqlite.New(config.StoragePath)
 
-	_ = storage
+	logger.Info("storage was loaded")
 
 	application := app.New(logger, config.Address, storage)
 
@@ -28,6 +26,8 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	logger.Info("application is running...")
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)

@@ -30,7 +30,7 @@ func New(path string) *UserRepo {
 			CONSTRAINT age_lt_0 CHECK (age > 0)
 		);
 
-		CREATE INDEX user_id_idx ON users(id);
+		CREATE INDEX IF NOT EXISTS user_id_idx ON users(id);
 	`)
 
 	if err != nil {

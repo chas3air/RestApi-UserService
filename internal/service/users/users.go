@@ -34,6 +34,6 @@ func (u UserService) Update(int, models.User) error {
 	panic("unimplemented")
 }
 
-func (u UserService) Delte(int) error {
+func (u UserService) Delete(int) error {
 	panic("unimplemented")
 }
