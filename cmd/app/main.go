@@ -1,6 +1,10 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+	"userservice/internal/app"
 	"userservice/internal/storage/sqlite"
 	"userservice/pkg/config"
 	"userservice/pkg/logger"
@@ -17,7 +21,17 @@ func main() {
 
 	_ = storage
 
-	// router
+	application := app.New(logger, config.Address, storage)
 
-	// run
+	go func() {
+		if err := application.Start(); err != nil {
+			panic(err)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	<-stop
+	logger.Info("Gracefully stopped")
 }

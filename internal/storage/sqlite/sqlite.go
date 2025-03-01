@@ -3,6 +3,7 @@ package sqlite
 import (
 	"database/sql"
 	"log"
+	"userservice/internal/domain/models"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -39,4 +40,24 @@ func New(path string) *UserRepo {
 	return &UserRepo{
 		Path: path,
 	}
+}
+
+func (ur *UserRepo) Get() ([]models.User, error) {
+	panic("unimplement")
+}
+
+func (ur *UserRepo) GetById(id int) (models.User, error) {
+	panic("unimplement")
+}
+
+func (ur *UserRepo) Insert(user models.User) error {
+	panic("unimplement")
+}
+
+func (ur *UserRepo) Update(id int, user models.User) error {
+	panic("unimplement")
+}
+
+func (ur *UserRepo) Delete(id int) error {
+	panic("unimplement")
 }

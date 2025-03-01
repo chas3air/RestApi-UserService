@@ -6,7 +6,6 @@ import (
 	"userservice/internal/storage"
 )
 
-
 type UserService struct {
 	log         *slog.Logger
 	UserStorage storage.Repository[models.User]
