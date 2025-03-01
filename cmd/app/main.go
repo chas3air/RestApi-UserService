@@ -1,7 +1,9 @@
 package main
 
+import "userservice/pkg/config"
+
 func main() {
-	// config
+	config := config.MustLoad()
 
 	// logger
 
