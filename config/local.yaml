@@ -1,0 +1,6 @@
+env: "local"
+storage_path: "./storage/db.db"
+http_server:
+  address: localhost:8088
+  timeout: 5s
+  
