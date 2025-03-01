@@ -1,3 +1,8 @@
 package storage
 
-// common errors of db here
+import "errors"
+
+var (
+	ErrNotFound      = errors.New("resource not found")
+	ErrAlreadyExists = errors.New("resource already exists")
+)

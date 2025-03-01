@@ -1,13 +1,21 @@
 package main
 
-import "userservice/pkg/config"
+import (
+	"userservice/internal/storage/sqlite.go"
+	"userservice/pkg/config"
+	"userservice/pkg/logger"
+)
 
 func main() {
 	config := config.MustLoad()
 
-	// logger
+	logger := logger.SetupLogger(config.Env)
 
-	// storage
+	_ = logger
+
+	storage := sqlite.New(config.StoragePath)
+
+	_ = storage
 
 	// router
 
