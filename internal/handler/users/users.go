@@ -2,12 +2,14 @@ package users_handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"userservice/internal/domain/models"
 	"userservice/internal/service"
+	"userservice/internal/storage"
 	"userservice/pkg/logger/sl"
 
 	"github.com/gorilla/mux"
@@ -69,15 +71,21 @@ func (uc *UserHandler) GetById(w http.ResponseWriter, r *http.Request) {
 
 	user, err := uc.userService.GetById(r.Context(), id)
 	if err != nil {
-		uc.log.Warn("Failed to retrieve user by id", sl.Err(err))
-		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
+		if errors.Is(err, storage.ErrNotFound) {
+			uc.log.Warn("User not found", sl.Err(err))
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
+
+		uc.log.Error("Failed to retrieve user by id", sl.Err(err))
+		http.Error(w, "Failed to retrieve user by id", http.StatusInternalServerError)
 		return
 	}
 
 	bs, err := json.Marshal(user)
 	if err != nil {
 		uc.log.Warn("Failed to marshal user to json", sl.Err(err))
-		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
+		http.Error(w, "ircorrect format of user", http.StatusInternalServerError)
 		return
 	}
 
@@ -101,8 +109,14 @@ func (uc *UserHandler) Insert(w http.ResponseWriter, r *http.Request) {
 
 	err = uc.userService.Insert(r.Context(), user)
 	if err != nil {
-		uc.log.Warn("Failed to insert user", sl.Err(err))
-		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
+		if errors.Is(err, storage.ErrAlreadyExists) {
+			uc.log.Warn("User already exists", sl.Err(err))
+			http.Error(w, "User already exists", http.StatusBadRequest)
+			return
+		}
+
+		uc.log.Error("Failed to insert user", sl.Err(err))
+		http.Error(w, "Failed to insert user", http.StatusInternalServerError)
 		return
 	}
 
@@ -138,8 +152,14 @@ func (uc *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	err = uc.userService.Update(r.Context(), id, user)
 	if err != nil {
-		uc.log.Warn("Failed to update user", sl.Err(err))
-		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
+		if errors.Is(err, storage.ErrNotFound) {
+			uc.log.Warn("User doesn't exists", sl.Err(err))
+			http.Error(w, "User doesn't exists", http.StatusBadRequest)
+			return
+		}
+
+		uc.log.Error("Failed to update user", sl.Err(err))
+		http.Error(w, "Failed to update user", http.StatusInternalServerError)
 		return
 	}
 
@@ -167,8 +187,14 @@ func (uc *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	err = uc.userService.Delete(r.Context(), id)
 	if err != nil {
-		uc.log.Warn("Failed to delete user", sl.Err(err))
-		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
+		if errors.Is(err, storage.ErrNotFound) {
+			uc.log.Warn("User doesn't exists", sl.Err(err))
+			http.Error(w, "User doesn't exists", http.StatusBadRequest)
+			return
+		}
+
+		uc.log.Error("Failed to delete user", sl.Err(err))
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
 		return
 	}
 

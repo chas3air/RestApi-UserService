@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"userservice/internal/domain/models"
 )
 
@@ -12,3 +13,7 @@ type IUserService interface {
 	Update(context.Context, int, models.User) error
 	Delete(context.Context, int) error
 }
+
+var (
+	ErrInvalidCredentials = errors.New("invalid credentials")
+)

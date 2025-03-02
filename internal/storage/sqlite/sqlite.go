@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"userservice/internal/domain/models"
+	"userservice/internal/storage"
 	"userservice/pkg/logger/sl"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -96,6 +97,9 @@ func (ur *UserRepo) GetById(ctx context.Context, id int) (models.User, error) {
 	var user models.User
 	err = row.Scan(&user.Id, &user.Surname, &user.Name, &user.Age)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.User{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+		}
 		ur.log.Warn("cannot scan row", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
@@ -110,6 +114,19 @@ func (ur *UserRepo) Insert(ctx context.Context, user models.User) error {
 		return fmt.Errorf("%s: failed to connect to database: %w", op, err)
 	}
 	defer db.Close()
+
+	var existingUser models.User
+	err = db.QueryRowContext(ctx, `
+		SELECT * FROM `+UsersTableName+`
+		WHERE surname = $1 AND name = $2 AND age = $3
+	`, user.Surname, user.Name, user.Age).Scan(&existingUser.Id, &existingUser.Surname, &existingUser.Name, &existingUser.Age)
+
+	if err == nil {
+		return fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
+	} else if err != sql.ErrNoRows {
+		ur.log.Error("error checking for existing user", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
 
 	_, err = db.ExecContext(ctx, `
 		INSERT INTO `+UsersTableName+` (surname, name, age)
@@ -131,14 +148,25 @@ func (ur *UserRepo) Update(ctx context.Context, id int, user models.User) error 
 	}
 	defer db.Close()
 
-	_, err = db.ExecContext(ctx, `
+	result, err := db.ExecContext(ctx, `
 		UPDATE `+UsersTableName+` 
 		SET surname=$1, name=$2, age=$3 
 		WHERE id=$4
 	`, user.Surname, user.Name, user.Age, id)
+
 	if err != nil {
 		ur.log.Error("error updating row", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		ur.log.Error("error checking affected rows", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 	}
 
 	return nil
@@ -152,12 +180,22 @@ func (ur *UserRepo) Delete(ctx context.Context, id int) error {
 	}
 	defer db.Close()
 
-	_, err = db.ExecContext(ctx, `
+	result, err := db.ExecContext(ctx, `
 		DELETE FROM `+UsersTableName+` WHERE id=$1;
 	`, id)
 	if err != nil {
 		ur.log.Error("error deleting row", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		ur.log.Error("error checking affected rows", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 	}
 
 	return nil
