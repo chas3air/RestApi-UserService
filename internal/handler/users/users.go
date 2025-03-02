@@ -29,7 +29,7 @@ func (uc *UserHandler) Get(w http.ResponseWriter, r *http.Request) {
 	const op = "handler.users.get"
 	uc.log.Info("/users (Get) is running...")
 
-	users, err := uc.userService.Get()
+	users, err := uc.userService.Get(r.Context())
 	if err != nil {
 		uc.log.Warn("Failed to retrieve users", sl.Err(err))
 		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
@@ -67,7 +67,7 @@ func (uc *UserHandler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := uc.userService.GetById(id)
+	user, err := uc.userService.GetById(r.Context(), id)
 	if err != nil {
 		uc.log.Warn("Failed to retrieve user by id", sl.Err(err))
 		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
@@ -99,7 +99,7 @@ func (uc *UserHandler) Insert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = uc.userService.Insert(user)
+	err = uc.userService.Insert(r.Context(), user)
 	if err != nil {
 		uc.log.Warn("Failed to insert user", sl.Err(err))
 		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
@@ -136,7 +136,7 @@ func (uc *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = uc.userService.Update(id, user)
+	err = uc.userService.Update(r.Context(), id, user)
 	if err != nil {
 		uc.log.Warn("Failed to update user", sl.Err(err))
 		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)
@@ -165,7 +165,7 @@ func (uc *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = uc.userService.Delete(id)
+	err = uc.userService.Delete(r.Context(), id)
 	if err != nil {
 		uc.log.Warn("Failed to delete user", sl.Err(err))
 		http.Error(w, fmt.Errorf("%s: %w", op, err).Error(), http.StatusInternalServerError)

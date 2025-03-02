@@ -1,11 +1,14 @@
 package service
 
-import "userservice/internal/domain/models"
+import (
+	"context"
+	"userservice/internal/domain/models"
+)
 
 type IUserService interface {
-	Get() ([]models.User, error)
-	GetById(int) (models.User, error)
-	Insert(models.User) error
-	Update(int, models.User) error
-	Delete(int) error
+	Get(context.Context) ([]models.User, error)
+	GetById(context.Context, int) (models.User, error)
+	Insert(context.Context, models.User) error
+	Update(context.Context, int, models.User) error
+	Delete(context.Context, int) error
 }
