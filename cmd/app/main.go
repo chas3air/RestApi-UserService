@@ -15,7 +15,7 @@ func main() {
 
 	logger := logger.SetupLogger(config.Env)
 
-	storage := sqlite.New(config.StoragePath)
+	storage := sqlite.New(logger, config.StoragePath)
 
 	logger.Info("storage was loaded")
 

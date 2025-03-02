@@ -1,9 +1,11 @@
 package storage
 
+import "context"
+
 type Repository[T any] interface {
-	Get() ([]T, error)
-	GetById(int) (T, error)
-	Insert(T) error
-	Update(int, T) error
-	Delete(int) error
+	Get(context.Context) ([]T, error)
+	GetById(context.Context, int) (T, error)
+	Insert(context.Context, T) error
+	Update(context.Context, int, T) error
+	Delete(context.Context, int) error
 }
